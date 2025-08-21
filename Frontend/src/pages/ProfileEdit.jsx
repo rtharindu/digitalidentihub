@@ -1,35 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { User, Phone, Calendar, Globe, Save, X, MapPin, Type, AlertCircle, RefreshCw } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  User,
+  Phone,
+  Calendar,
+  Globe,
+  Save,
+  X,
+  MapPin,
+  Type,
+  AlertCircle,
+  RefreshCw,
+} from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 const ProfileEdit = () => {
   const [formData, setFormData] = useState({
-    fullName: '',
-    phone: '',
-    dateOfBirth: '',
-    location: '',
-    language: 'English',
-    bio: '',
-    timezone: 'Asia/Colombo'
+    fullName: "",
+    phone: "",
+    dateOfBirth: "",
+    location: "",
+    language: "English",
+    bio: "",
+    timezone: "Asia/Colombo",
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const { token } = useAuth();
   const navigate = useNavigate();
 
   const fetchProfile = async () => {
     setLoading(true);
-    setError('');
+    setError("");
     try {
-      const response = await fetch('http://localhost:5000/profile', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        "https://digitalidentihubbackend-5vzo.vercel.app/profile",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to fetch profile (${response.status})`);
@@ -37,20 +51,22 @@ const ProfileEdit = () => {
 
       const data = await response.json();
       const profile = data.profile;
-      
+
       // Populate form with existing data
       setFormData({
-        fullName: profile.fullName || '',
-        phone: profile.phone || '',
-        dateOfBirth: profile.dateOfBirth ? profile.dateOfBirth.split('T')[0] : '', // Format date for input
-        location: profile.location || '',
-        language: profile.language || 'English',
-        bio: profile.bio || '',
-        timezone: profile.timezone || 'Asia/Colombo'
+        fullName: profile.fullName || "",
+        phone: profile.phone || "",
+        dateOfBirth: profile.dateOfBirth
+          ? profile.dateOfBirth.split("T")[0]
+          : "", // Format date for input
+        location: profile.location || "",
+        language: profile.language || "English",
+        bio: profile.bio || "",
+        timezone: profile.timezone || "Asia/Colombo",
       });
     } catch (err) {
-      console.error('Profile fetch error:', err);
-      setError(err.message || 'Failed to load profile');
+      console.error("Profile fetch error:", err);
+      setError(err.message || "Failed to load profile");
     } finally {
       setLoading(false);
     }
@@ -60,64 +76,69 @@ const ProfileEdit = () => {
     if (token) {
       fetchProfile();
     } else {
-      setError('Authentication required');
+      setError("Authentication required");
       setLoading(false);
     }
   }, [token]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     // Clear success message when user starts editing
-    if (success) setSuccess('');
+    if (success) setSuccess("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
       // Validate required fields
       if (!formData.fullName.trim()) {
-        throw new Error('Full name is required');
+        throw new Error("Full name is required");
       }
 
-      const response = await fetch('http://localhost:5000/profile', {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
+      const response = await fetch(
+        "https://digitalidentihubbackend-5vzo.vercel.app/profile",
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || `Update failed (${response.status})`);
+        throw new Error(
+          errorData.message || `Update failed (${response.status})`
+        );
       }
 
       const data = await response.json();
-      setSuccess('Profile updated successfully!');
-      
+      setSuccess("Profile updated successfully!");
+
       // Redirect to profile view after a short delay
       setTimeout(() => {
-        navigate('/profile/view');
+        navigate("/profile/view");
       }, 1500);
     } catch (err) {
-      console.error('Profile update error:', err);
-      setError(err.message || 'Failed to update profile');
+      console.error("Profile update error:", err);
+      setError(err.message || "Failed to update profile");
     } finally {
       setSaving(false);
     }
   };
 
   const handleCancel = () => {
-    navigate('/profile/view');
+    navigate("/profile/view");
   };
 
   if (loading) {
@@ -136,7 +157,9 @@ const ProfileEdit = () => {
       <div className="min-h-screen bg-soft-blue flex items-center justify-center p-4">
         <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6 text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Error Loading Profile</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Error Loading Profile
+          </h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <div className="space-y-2">
             <button
@@ -164,9 +187,7 @@ const ProfileEdit = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Edit Profile</h1>
-          <p className="text-white/80">
-            Update your personal information
-          </p>
+          <p className="text-white/80">Update your personal information</p>
         </div>
 
         <div className="card">
@@ -175,8 +196,16 @@ const ProfileEdit = () => {
             <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
               <div className="flex items-center text-green-700">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  <svg
+                    className="h-5 w-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </div>
                 <div className="ml-3">
@@ -324,4 +353,4 @@ const ProfileEdit = () => {
   );
 };
 
-export default ProfileEdit; 
+export default ProfileEdit;
